@@ -16,6 +16,11 @@ class UserRepository implements UserRepositoryInterface
         return $this->model->latest()->get();
     }
 
+    public function getByRoles(array $roles): Collection
+    {
+        return $this->model->whereIn('role', $roles)->latest()->get();
+    }
+
     public function getById(int $id): ?User
     {
         return $this->model->find($id);
@@ -24,5 +29,28 @@ class UserRepository implements UserRepositoryInterface
     public function create(array $data): User
     {
         return $this->model->create($data);
+    }
+
+    public function update(int $id, array $data): ?User
+    {
+        $user = $this->getById($id);
+        
+        if (!$user) {
+            return null;
+        }
+
+        $user->update($data);
+        return $user->fresh();
+    }
+
+    public function delete(int $id): bool
+    {
+        $user = $this->getById($id);
+        
+        if (!$user) {
+            return false;
+        }
+
+        return $user->delete();
     }
 }

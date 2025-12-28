@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\User;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\StoreUserRequest;
+use App\Http\Requests\User\UpdateUserRequest;
 use App\Http\Resources\Auth\UserResource;
 use App\Services\User\UserServiceInterface;
 use App\Traits\ApiResponse;
@@ -19,13 +20,33 @@ class UserController extends Controller
         protected UserServiceInterface $userService
     ) {}
 
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $users = $this->userService->getAll();
+        $user = $request->user();
+        
+        if ($user->isStudent()) {
+            return $this->error('Bu sayfaya erişim yetkiniz yok.', 403);
+        }
+
+        $users = $this->userService->getManageableUsers($user);
 
         return $this->success(
             UserResource::collection($users),
             'Kullanıcılar listelendi'
+        );
+    }
+
+    public function show(Request $request, int $id): JsonResponse
+    {
+        $user = $this->userService->getById($id);
+
+        if (!$user) {
+            return $this->error('Kullanıcı bulunamadı', 404);
+        }
+
+        return $this->success(
+            new UserResource($user),
+            'Kullanıcı detayı'
         );
     }
 
@@ -42,6 +63,43 @@ class UserController extends Controller
                 'Kullanıcı oluşturuldu',
                 201
             );
+        } catch (AuthorizationException $e) {
+            return $this->error($e->getMessage(), 403);
+        }
+    }
+
+    public function update(UpdateUserRequest $request, int $id): JsonResponse
+    {
+        try {
+            $user = $this->userService->update(
+                $id,
+                $request->validated(),
+                $request->user()
+            );
+
+            if (!$user) {
+                return $this->error('Kullanıcı bulunamadı', 404);
+            }
+
+            return $this->success(
+                new UserResource($user),
+                'Kullanıcı güncellendi'
+            );
+        } catch (AuthorizationException $e) {
+            return $this->error($e->getMessage(), 403);
+        }
+    }
+
+    public function destroy(Request $request, int $id): JsonResponse
+    {
+        try {
+            $deleted = $this->userService->delete($id, $request->user());
+
+            if (!$deleted) {
+                return $this->error('Kullanıcı bulunamadı', 404);
+            }
+
+            return $this->success(null, 'Kullanıcı silindi');
         } catch (AuthorizationException $e) {
             return $this->error($e->getMessage(), 403);
         }
