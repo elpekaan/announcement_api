@@ -40,6 +40,11 @@ class User extends Authenticatable
         return $this->hasMany(Announcement::class, 'author_id');
     }
 
+    public function isSuperAdmin(): bool
+    {
+        return $this->role === UserRole::SUPER_ADMIN;
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === UserRole::ADMIN;
@@ -53,5 +58,26 @@ class User extends Authenticatable
     public function isStudent(): bool
     {
         return $this->role === UserRole::STUDENT;
+    }
+
+    public function canManageAllAnnouncements(): bool
+    {
+        return $this->isSuperAdmin() || $this->isAdmin();
+    }
+
+    public function canCreateUsers(): bool
+    {
+        return $this->isSuperAdmin() || $this->isAdmin();
+    }
+
+    public function getDisplayNameForAnnouncement(): string
+    {
+        if ($this->isSuperAdmin()) {
+            return 'Super Admin';
+        }
+        if ($this->isAdmin()) {
+            return 'Admin';
+        }
+        return $this->name;
     }
 }

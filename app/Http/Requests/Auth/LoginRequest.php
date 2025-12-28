@@ -14,7 +14,7 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
+            'email' => ['required', 'string', 'email', ], // 'regex:/^[a-zA-Z0-9._%+-]+@ciu\.edu\.tr$/'
             'password' => ['required', 'string'],
         ];
     }
@@ -24,6 +24,7 @@ class LoginRequest extends FormRequest
         return [
             'email.required' => 'Email gerekli.',
             'email.email' => 'Geçerli bir email girin.',
+            // 'email.regex' => 'Sadece @ciu.edu.tr uzantılı mail adresleri ile giriş yapabilirsiniz.',
             'password.required' => 'Şifre gerekli.',
         ];
     }

@@ -17,7 +17,7 @@ class AnnouncementResource extends JsonResource
             'priority' => $this->priority->value,
             'target_audience' => $this->target_audience->value,
             'author_id' => $this->author_id,
-            'author_name' => $this->author->name,
+            'author_name' => $this->author->getDisplayNameForAnnouncement(),
             'created_at' => $this->created_at->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),
         ];

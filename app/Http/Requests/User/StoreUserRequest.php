@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Requests\Auth;
+namespace App\Http\Requests\User;
 
 use App\Enums\UserRole;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
 use Illuminate\Validation\Rules\Password;
 
-class RegisterRequest extends FormRequest
+class StoreUserRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -19,7 +19,8 @@ class RegisterRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users', 'regex:/^[a-zA-Z0-9._%+-]+@ciu\.edu\.tr$/'],
-            'password' => ['required', 'string', Password::min(6)],
+            'password' => ['required', 'string', Password::min(6), 'confirmed'],
+            'password_confirmation' => ['required', 'string'],
             'role' => ['required', new Enum(UserRole::class)],
         ];
     }
@@ -34,6 +35,8 @@ class RegisterRequest extends FormRequest
             'email.regex' => 'Sadece @ciu.edu.tr uzantılı mail adresleri kabul edilmektedir.',
             'password.required' => 'Şifre gerekli.',
             'password.min' => 'Şifre en az 6 karakter olmalı.',
+            'password.confirmed' => 'Şifreler eşleşmiyor.',
+            'password_confirmation.required' => 'Şifre tekrarı gerekli.',
             'role.required' => 'Kullanıcı tipi gerekli.',
         ];
     }

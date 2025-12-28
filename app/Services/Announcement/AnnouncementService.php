@@ -47,6 +47,12 @@ class AnnouncementService implements AnnouncementServiceInterface
             throw new AuthorizationException('Öğrenciler duyuru düzenleyemez.');
         }
 
+        // Super Admin ve Admin her duyuruyu düzenleyebilir
+        if ($user->canManageAllAnnouncements()) {
+            return $this->announcementRepository->update($id, $data);
+        }
+
+        // Öğretmen sadece kendi duyurusunu düzenleyebilir
         if ($user->isTeacher() && $announcement->author_id !== $user->id) {
             throw new AuthorizationException('Sadece kendi duyurularınızı düzenleyebilirsiniz.');
         }
@@ -66,6 +72,12 @@ class AnnouncementService implements AnnouncementServiceInterface
             throw new AuthorizationException('Öğrenciler duyuru silemez.');
         }
 
+        // Super Admin ve Admin her duyuruyu silebilir
+        if ($user->canManageAllAnnouncements()) {
+            return $this->announcementRepository->delete($id);
+        }
+
+        // Öğretmen sadece kendi duyurusunu silebilir
         if ($user->isTeacher() && $announcement->author_id !== $user->id) {
             throw new AuthorizationException('Sadece kendi duyurularınızı silebilirsiniz.');
         }
